@@ -3,8 +3,10 @@ package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks;
 
 import com.wurmonline.server.creatures.Communicator;
 import com.wurmonline.server.players.Player;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHook;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.AHealedWound;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsPerformer;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
 import org.gotti.wurmunlimited.modsupport.ModSupportDb;
@@ -23,10 +25,16 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
     public static Logger logger = Logger.getLogger("TyrfangsGameTweaks");
     public static boolean readWaxedItems;
     public Player aHealedPlayer;
+    long nextWoundPoll = 0;
 
     @Override
     public void configure(Properties properties) {
         Config.fixedWaxingCost = Boolean.parseBoolean(properties.getProperty("fixedWaxingCost", "true"));
+        Config.whiskyHeals = Boolean.parseBoolean(properties.getProperty("whiskyHeals", "true"));
+        Config.sleepMalus = Boolean.parseBoolean(properties.getProperty("sleepMalus", "true"));
+        Config.healPerQl = Float.parseFloat(properties.getProperty("healPerQl", "0.05"));
+        Config.usageFactor = Float.parseFloat(properties.getProperty("usageFactor", "1"));
+
     }
 
     @Override
@@ -40,20 +48,21 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
         if (message != null && message.startsWith("#setTar") && communicator.getPlayer().getPower() >= 4) {
 
             communicator.sendSafeServerMessage("Turning Everything into Tar!");
-            SeedOres.setTar();
+            //SeedOres.setTar();
 
         }
         if (message != null && message.startsWith("#seedCaves") && communicator.getPlayer().getPower() >= 4) {
 
             communicator.sendSafeServerMessage("Making random Caves!");
-            SeedOres.setTar();
+           // SeedOres.setTar();
 
         }
     }
 
     @Override
     public void onServerPoll() {
-        long playerId = 0L;
+
+
         if (!readWaxedItems) {
             try {
                 WaxingPerformer.readFromDB(dbConn);
@@ -62,21 +71,37 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
             }
         }
 
-                // Iterator and Heal
-                Iterator<Long> healedPlayersIterator = WhiskyHealsPerformer.healedPlayers.iterator();
+
+        // Iterator and Heal
+        if (!WhiskyHealsPerformer.healedPlayers.isEmpty()) {
+            long time = System.currentTimeMillis();
+            if (nextWoundPoll < time) {
+                int realHeal = 0;
+                Iterator<AHealedWound> healedPlayersIterator = WhiskyHealsPerformer.healedPlayers.iterator();
 
 
                 while (healedPlayersIterator.hasNext()) {
 
-                    playerId= healedPlayersIterator.next();
+                    AHealedWound aWoundToHeal = healedPlayersIterator.next();
+                    int index = WhiskyHealsPerformer.healedPlayers.indexOf(aWoundToHeal);
+                    aWoundToHeal.healingPool = aWoundToHeal.healingPool + (aWoundToHeal.bandageQuality * Config.healPerQl);
+                    if (aWoundToHeal.healingPool >= 1.0F) {
+                        realHeal = (int) aWoundToHeal.healingPool;
+                        aWoundToHeal.theWound.modifySeverity(-realHeal);
+                        aWoundToHeal.healingPool -= realHeal;
 
+                    }
+                    aWoundToHeal.tickCounter++;
+                    if (aWoundToHeal.tickCounter == 10) {
+                        healedPlayersIterator.remove();
+                    } else
+                        WhiskyHealsPerformer.healedPlayers.set(index, aWoundToHeal);
+                    nextWoundPoll = time + 1000;
 
-
-
-
+                }
             }
         }
-
+    }
 
 
     @Override
@@ -106,6 +131,6 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
 
     @Override
     public void preInit() {
-        WurmServerMod.super.preInit();
+        SleepBonusHook.insert();
     }
 }

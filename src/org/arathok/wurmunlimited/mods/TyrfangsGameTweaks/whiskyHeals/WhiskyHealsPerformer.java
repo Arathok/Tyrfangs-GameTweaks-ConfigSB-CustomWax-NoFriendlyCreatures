@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class WhiskyHealsPerformer implements ActionPerformer {
-public static List <Long> healedPlayers = new LinkedList<Long>();
+    public static List<AHealedWound> healedPlayers = new LinkedList<AHealedWound>();
 
     public ActionEntry actionEntry;
 
@@ -69,11 +69,26 @@ public static List <Long> healedPlayers = new LinkedList<Long>();
 
 
 // EFFECT STUFF GOES HERE
-        if (!healedPlayers.contains(performer.getWurmId()))
-        healedPlayers.add(performer.getWurmId());
+        boolean woundFound = false;
+        for (AHealedWound testExist : healedPlayers)
+        {
+            if (testExist.theWound==target)
+            {
+                woundFound = true;
+            }
+        }
+        if (!woundFound) {
+            AHealedWound newWound=new AHealedWound();
+            newWound.theWound=target;
+            newWound.healingPool=0;
+            newWound.bandageQuality= source.getCurrentQualityLevel();
+            newWound.tickCounter=0;
+            healedPlayers.add(newWound);
+            source.setWeight(-100*((int)Config.usageFactor),true);
+        }
         else
             performer.getCommunicator().sendSafeServerMessage("You already have desinfected your wounds, you decide to wait a little bit");
-   
+
 
         return propagate(action,
                 ActionPropagation.FINISH_ACTION,
@@ -82,6 +97,7 @@ public static List <Long> healedPlayers = new LinkedList<Long>();
     }
 
 
+    }
 
 
-}
+
