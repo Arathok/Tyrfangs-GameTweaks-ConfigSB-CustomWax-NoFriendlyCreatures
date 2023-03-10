@@ -91,6 +91,7 @@ public class WaxingPerformer implements ActionPerformer {
         target.setHasNoDecay(true);
         target.setIsNoEatOrDrink(true);
         target.sendUpdate();
+        target.savePermissions();
         waxedItems.add(target.getWurmId());
         try {
             add(TyrfangsGameTweaks.dbConn, target.getWurmId());

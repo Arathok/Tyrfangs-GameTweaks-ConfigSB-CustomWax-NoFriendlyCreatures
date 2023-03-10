@@ -10,7 +10,6 @@ import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.noFriendlies.NoFriendli
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHook;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
-import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.AHealedWound;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsPerformer;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyItems;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
