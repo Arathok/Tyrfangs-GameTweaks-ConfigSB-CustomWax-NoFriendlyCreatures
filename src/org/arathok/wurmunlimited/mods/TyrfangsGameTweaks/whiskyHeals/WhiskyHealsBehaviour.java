@@ -1,6 +1,7 @@
 package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals;
 
 import com.wurmonline.server.behaviours.ActionEntry;
+import com.wurmonline.server.bodys.Wound;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
@@ -29,9 +30,9 @@ public class WhiskyHealsBehaviour implements BehaviourProvider {
     //, , , , ;
 
     @Override
-    public List<ActionEntry> getBehavioursFor(Creature performer, Item target) {
+    public List<ActionEntry> getBehavioursFor(Creature performer, Item source, Wound target) {
 
-        if (target.getTemplateId()== WhiskyItems.gauzeId) {
+        if (source.getTemplateId()== WhiskyItems.gauzeId) {
 
             return new ArrayList<>(desinfect);
         }

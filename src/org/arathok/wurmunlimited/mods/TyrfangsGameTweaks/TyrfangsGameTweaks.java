@@ -7,11 +7,14 @@ import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHo
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.AHealedWound;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsBehaviour;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsPerformer;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyItems;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
 import org.gotti.wurmunlimited.modsupport.ModSupportDb;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -39,6 +42,12 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
 
     @Override
     public void onItemTemplatesCreated() {
+
+        try {
+            WhiskyItems.registerGauze();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -73,35 +82,10 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
 
 
         // Iterator and Heal
-        if (!WhiskyHealsPerformer.healedPlayers.isEmpty()) {
-            long time = System.currentTimeMillis();
-            if (nextWoundPoll < time) {
-                int realHeal = 0;
-                Iterator<AHealedWound> healedPlayersIterator = WhiskyHealsPerformer.healedPlayers.iterator();
 
-
-                while (healedPlayersIterator.hasNext()) {
-
-                    AHealedWound aWoundToHeal = healedPlayersIterator.next();
-                    int index = WhiskyHealsPerformer.healedPlayers.indexOf(aWoundToHeal);
-                    aWoundToHeal.healingPool = aWoundToHeal.healingPool + (aWoundToHeal.bandageQuality * Config.healPerQl);
-                    if (aWoundToHeal.healingPool >= 1.0F) {
-                        realHeal = (int) aWoundToHeal.healingPool;
-                        aWoundToHeal.theWound.modifySeverity(-realHeal);
-                        aWoundToHeal.healingPool -= realHeal;
-
-                    }
-                    aWoundToHeal.tickCounter++;
-                    if (aWoundToHeal.tickCounter == 10) {
-                        healedPlayersIterator.remove();
-                    } else
-                        WhiskyHealsPerformer.healedPlayers.set(index, aWoundToHeal);
-                    nextWoundPoll = time + 1000;
-
-                }
             }
-        }
-    }
+
+
 
 
     @Override
@@ -122,6 +106,8 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
             throw new RuntimeException(e);
         }
         ModActions.registerBehaviourProvider(new WaxingBehavior());
+        if (Config.whiskyHeals)
+        ModActions.registerBehaviourProvider(new WhiskyHealsBehaviour());
     }
 
     @Override
@@ -131,6 +117,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
 
     @Override
     public void preInit() {
+        if(Config.sleepMalus)
         SleepBonusHook.insert();
     }
 }
