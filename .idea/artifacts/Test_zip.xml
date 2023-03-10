@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact name="Test.zip">
+    <output-path>$PROJECT_DIR$/out/artifacts/Test_zip</output-path>
+    <root id="root">
+      <element id="archive" name="TyrfangsGameTweaks.zip">
+        <element id="directory" name="mods">
+          <element id="directory" name="TyrfangsGameTweaks">
+            <element id="archive" name="TyrfangsGameTweaks.jar">
+              <element id="module-output" name="Tyrfangs-GameTweaks-ConfigSB-CustomWax-NoFriendlyCreatures" />
+            </element>
+          </element>
+          <element id="file-copy" path="$PROJECT_DIR$/TyrfangsGameTweaks.config" />
+          <element id="file-copy" path="$PROJECT_DIR$/TyrfangsGameTweaks.properties" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

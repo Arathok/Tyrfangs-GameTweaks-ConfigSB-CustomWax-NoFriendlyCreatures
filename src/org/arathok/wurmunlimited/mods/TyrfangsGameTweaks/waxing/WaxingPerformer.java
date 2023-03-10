@@ -1,5 +1,7 @@
 package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing;
 
+import com.wurmonline.server.Items;
+import com.wurmonline.server.NoSuchItemException;
 import com.wurmonline.server.behaviours.Action;
 import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
@@ -19,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class WaxingPerformer implements ActionPerformer {
 
@@ -87,6 +90,7 @@ public class WaxingPerformer implements ActionPerformer {
 
         target.setHasNoDecay(true);
         target.setIsNoEatOrDrink(true);
+        target.sendUpdate();
         waxedItems.add(target.getWurmId());
         try {
             add(TyrfangsGameTweaks.dbConn, target.getWurmId());
@@ -101,13 +105,16 @@ public class WaxingPerformer implements ActionPerformer {
     }
 
 
-    public static void readFromDB(Connection dbConn) throws SQLException {
+    public static void readFromDB(Connection dbConn) throws SQLException, NoSuchItemException {
         Long itemId;
         PreparedStatement ps = dbConn.prepareStatement("SELECT * FROM ArathoksWaxedItems");
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
 
             itemId = rs.getLong("itemId"); // liest quasi den Wert von der Spalte
+
+            Item test = Items.getItem(itemId);
+
             waxedItems.add(itemId);
 
 
@@ -118,15 +125,17 @@ public class WaxingPerformer implements ActionPerformer {
 
     public static void add(Connection dbConn, long itemId) throws SQLException {
         waxedItems.add(itemId);
-        PreparedStatement ps = dbConn.prepareStatement("insert into ArathoksWaxedItems (itemID) values (?)");
+        PreparedStatement ps = dbConn.prepareStatement("insert or replace into ArathoksWaxedItems (itemID) values (?)");
         ps.setLong(1, itemId);
-
+        ps.executeUpdate();
 
     }
 
     public static void remove(Connection dbConn, long itemId) throws SQLException {
         waxedItems.remove(itemId);
         PreparedStatement psDeleteRow = dbConn.prepareStatement("DELETE FROM ArathoksWaxedItems WHERE itemId = " + itemId);
+        psDeleteRow.execute();
+        psDeleteRow.close();
     }
 
 }

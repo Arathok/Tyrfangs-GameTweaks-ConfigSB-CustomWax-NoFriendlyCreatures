@@ -4,13 +4,17 @@ import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.TyrfangsGameTweaks;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 
+import java.util.logging.Level;
 
-public class noFriendliesHook {
+
+public class NoFriendliesHook {
     static ClassPool classPool = HookManager.getInstance().getClassPool();
     static CtClass ctCreatureTemplateCreator;
-    public void insert() throws NotFoundException, CannotCompileException {
+    public static void insert() throws NotFoundException, CannotCompileException {
+        TyrfangsGameTweaks.logger.log(Level.INFO, "Hooking no friendlies into base Game");
         ctCreatureTemplateCreator = classPool.getCtClass("com.wurmonline.server.creatures.CreatureTemplateCreator");
         //private static void createHyenaLabilaTemplate(int id, String name, String plural, String longDesc, Skills skills) throws IOException {
         ctCreatureTemplateCreator.getMethod("createHyenaLabilaTemplate", "(ILjava/lang/String;java/lang/String;java/lang/String;Lcom/wurmonline/server/skills/Skills;)V").setBody(" {\n" +

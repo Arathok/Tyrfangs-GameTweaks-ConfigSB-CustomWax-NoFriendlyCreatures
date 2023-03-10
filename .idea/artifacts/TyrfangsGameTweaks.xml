@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="TyrfangsGameTweaks">
+    <output-path>D:/Spiele/Steam/steamapps/common/Wurm Unlimited Dedicated Server/mods/TyrfangsGameTweaks</output-path>
+    <root id="archive" name="TyrfangsGameTweaks.jar">
+      <element id="module-output" name="Tyrfangs-GameTweaks-ConfigSB-CustomWax-NoFriendlyCreatures" />
+    </root>
+  </artifact>
+</component>

@@ -32,39 +32,39 @@ public class SleepBonusHook {
             //protected void alterSkill(double advanceMultiplicator, boolean decay, float times, boolean useNewSystem, double skillDivider) {
             ctSkill.getMethod("alterSkill", "(DZFZD)V")
                     .setBody("{ if (this.parent.hasSkillGain) {\n" +
-                            "      times = Math.min((SkillSystem.getTickTimeFor(getNumber()) > 0L || \n" +
-                            "          getNumber() == 10033) ? 100.0F : 30.0F, times);\n" +
-                            "      advanceMultiplicator *= (times * Servers.localServer.getSkillGainRate());\n" +
+                            "      $3 = Math.min((com.wurmonline.server.skills.SkillSystem.getTickTimeFor(getNumber()) > 0L || \n" +
+                            "          getNumber() == 10033) ? 100.0F : 30.0F, $3);\n" +
+                            "      $1 *= ($3 * com.wurmonline.server.Servers.localServer.getSkillGainRate());\n" +
                             "      this.lastUsed = System.currentTimeMillis();\n" +
                             "      boolean isplayer = false;\n" +
                             "      long pid = this.parent.getId();\n" +
-                            "      if (WurmId.getType(pid) == 0)\n" +
+                            "      if (com.wurmonline.server.WurmId.getType(pid) == 0)\n" +
                             "        isplayer = true; \n" +
                             "      double oldknowledge = this.knowledge;\n" +
-                            "      if (decay) {\n" +
+                            "      if ($2) {\n" +
                             "        if (isplayer) {\n" +
                             "          if (this.knowledge <= 70.0D)\n" +
                             "            return; \n" +
                             "          double villageMod = 1.0D;\n" +
                             "          try {\n" +
-                            "            Player player = Players.getInstance().getPlayer(pid);\n" +
+                            "            com.wurmonline.server.players.Player player = com.wurmonline.server.Players.getInstance().getPlayer(pid);\n" +
                             "            villageMod = player.getVillageSkillModifier();\n" +
-                            "          } catch (NoSuchPlayerException nsp) {\n" +
-                            "            logger.log(Level.WARNING, \"Player with id \" + this.id + \" is decaying skills while not online?\", (Throwable)nsp);\n" +
+                            "          } catch (com.wurmonline.server.NoSuchPlayerException nsp) {\n" +
+                            "            logger.log(java.util.logging.Level.WARNING, \"Player with id \" + this.id + \" is decaying skills while not online?\", (Throwable)nsp);\n" +
                             "          } \n" +
-                            "          this.knowledge = Math.max(1.0D, this.knowledge + advanceMultiplicator * villageMod);\n" +
+                            "          this.knowledge = Math.max(1.0D, this.knowledge + $1 * villageMod);\n" +
                             "        } else {\n" +
-                            "          this.knowledge = Math.max(1.0D, this.knowledge + advanceMultiplicator);\n" +
+                            "          this.knowledge = Math.max(1.0D, this.knowledge + $1);\n" +
                             "        } \n" +
                             "      } else {\n" +
-                            "        advanceMultiplicator *= skillMod;\n" +
-                            "        if (this.number == 10086 && Servers.localServer.isChallengeOrEpicServer() && \n" +
-                            "          !Server.getInstance().isPS())\n" +
-                            "          advanceMultiplicator *= 2.0D; \n" +
+                            "        $1 *= skillMod;\n" +
+                            "        if (this.number == 10086 && com.wurmonline.server.Servers.localServer.isChallengeOrEpicServer() && \n" +
+                            "          !com.wurmonline.server.Server.getInstance().isPS())\n" +
+                            "          $1 *= 2.0D; \n" +
                             "        if (isplayer)\n" +
                             "          try {\n" +
-                            "            Player player = Players.getInstance().getPlayer(pid);\n" +
-                            "            advanceMultiplicator *= (1.0F + ItemBonus.getSkillGainBonus((Creature)player, getNumber()));\n" +
+                            "            com.wurmonline.server.players.Player player = com.wurmonline.server.Players.getInstance().getPlayer(pid);\n" +
+                            "            $1 *= (1.0F + com.wurmonline.server.players.ItemBonus.getSkillGainBonus((com.wurmonline.server.creatures.Creature)player, getNumber()));\n" +
                             "            int currstam = player.getStatus().getStamina();\n" +
                             "            float staminaMod = 1.0F;\n" +
                             "            if (currstam <= 400)\n" +
@@ -74,7 +74,7 @@ public class SleepBonusHook {
                             "            if (player.getDeity() != null) {\n" +
                             "              if (player.mustChangeTerritory() && !player.isFighting()) {\n" +
                             "                staminaMod = 0.1F;\n" +
-                            "                if (Server.rand.nextInt(100) == 0)\n" +
+                            "                if (com.wurmonline.server.Server.rand.nextInt(100) == 0)\n" +
                             "                  player.getCommunicator().sendAlertServerMessage(\"You sense a lack of energy. Rumours have it that \" + \n" +
                             "                      (player.getDeity()).name + \" wants \" + player\n" +
                             "                      .getDeity().getHisHerItsString() + \" champions to move between kingdoms and seek out the enemy.\"); \n" +
@@ -91,65 +91,65 @@ public class SleepBonusHook {
                             "            staminaMod += Math.max(player.getStatus().getNutritionlevel() / 10.0F - 0.05F, 0.0F);\n" +
                             "            if (player.isFighting() && currstam <= 400)\n" +
                             "              staminaMod = 0.0F; \n" +
-                            "            advanceMultiplicator *= staminaMod;\n" +
-                            "            if (player.getEnemyPresense() > Player.minEnemyPresence && \n" +
+                            "            $1 *= staminaMod;\n" +
+                            "            if (player.getEnemyPresense() > com.wurmonline.server.players.Player.minEnemyPresence && \n" +
                             "              !ignoresEnemy())\n" +
-                            "              advanceMultiplicator *= 0.800000011920929D; \n" +
+                            "              $1 *= 0.800000011920929D; \n" +
                             "            if (this.knowledge < this.minimum || (this.basicPersonal && this.knowledge < 20.0D))\n" +
-                            "              advanceMultiplicator *= 3.0D; \n" +
+                            "              $1 *= 3.0D; \n" +
                             "            if (player.hasSleepBonus())\n" +
-                            "              advanceMultiplicator *= 1.5D; \n" + // Hier Sleep Bonus!Faktor
-                            "            int taffinity = this.affinity + (AffinitiesTimed.isTimedAffinity(pid, getNumber()) ? 1 : 0);\n" +
-                            "            advanceMultiplicator *= (1.0F + taffinity * 0.1F);\n" +
+                            "              $1 *= 1.5D; \n" + // Hier Sleep Bonus!Faktor
+                            "            int taffinity = this.affinity + (com.wurmonline.server.skills.AffinitiesTimed.isTimedAffinity(pid, getNumber()) ? 1 : 0);\n" +
+                            "            $1 *= (1.0F + taffinity * 0.1F);\n" +
                             "            if ((player.getMovementScheme()).samePosCounts > 20)\n" +
-                            "              advanceMultiplicator = 0.0D; \n" +
+                            "              $1 = 0.0D; \n" +
                             "            if (!player.isPaying() && this.knowledge >= 20.0D) {\n" +
-                            "              advanceMultiplicator = 0.0D;\n" +
-                            "              if (!player.isPlayerAssistant() && Server.rand.nextInt(500) == 0)\n" +
+                            "              $1 = 0.0D;\n" +
+                            "              if (!player.isPlayerAssistant() && com.wurmonline.server.Server.rand.nextInt(500) == 0)\n" +
                             "                player.getCommunicator().sendNormalServerMessage(\"You may only gain skill beyond level 20 if you have a premium account.\", (byte)2); \n" +
                             "            } \n" +
                             "            if (this.number == 10055 || this.number == 10053 || this.number == 10054)\n" +
                             "              if (player.loggerCreature1 > 0L)\n" +
-                            "                logger.log(Level.INFO, player\n" +
+                            "                logger.log(java.util.logging.Level.INFO, player\n" +
                             "                    \n" +
                             "                    .getName() + \" advancing \" + \n" +
-                            "                    Math.min(1.0D, advanceMultiplicator * this.knowledge / skillDivider) + \"!\");  \n" +
-                            "          } catch (NoSuchPlayerException nsp) {\n" +
-                            "            advanceMultiplicator = 0.0D;\n" +
-                            "            logger.log(Level.WARNING, \"Player with id \" + this.id + \" is learning skills while not online?\", (Throwable)nsp);\n" +
+                            "                    Math.min(1.0D, $1 * this.knowledge / $5) + \"!\");  \n" +
+                            "          } catch (com.wurmonline.server.NoSuchPlayerException nsp) {\n" +
+                            "            $1 = 0.0D;\n" +
+                            "            logger.log(java.util.logging.Level.WARNING, \"Player with id \" + this.id + \" is learning skills while not online?\", (Throwable)nsp);\n" +
                             "          }  \n" +
-                            "        if (useNewSystem) {\n" +
+                            "        if ($4) {\n" +
                             "          double maxSkillRate = 40.0D;\n" +
                             "          double rateMod = 1.0D;\n" +
-                            "          short sType = SkillSystem.getTypeFor(this.number);\n" +
+                            "          short sType = com.wurmonline.server.skills.SkillSystem.getTypeFor(this.number);\n" +
                             "          if (sType == 1 || sType == 0) {\n" +
                             "            maxSkillRate = 60.0D;\n" +
                             "            rateMod = 0.8D;\n" +
                             "          } \n" +
-                            "          double skillRate = Math.min(maxSkillRate, skillDivider * (1.0D + this.knowledge / (100.0D - 90.0D * this.knowledge / 110.0D)) * rateMod);\n" +
+                            "          double skillRate = Math.min(maxSkillRate, $5 * (1.0D + this.knowledge / (100.0D - 90.0D * this.knowledge / 110.0D)) * rateMod);\n" +
                             "          this\n" +
-                            "            .knowledge = Math.max(1.0D, this.knowledge + Math.min(1.0D, advanceMultiplicator * this.knowledge / skillRate));\n" +
+                            "            .knowledge = Math.max(1.0D, this.knowledge + Math.min(1.0D, $1 * this.knowledge / skillRate));\n" +
                             "        } else {\n" +
-                            "          this.knowledge = Math.max(1.0D, this.knowledge + Math.min(1.0D, advanceMultiplicator * this.knowledge));\n" +
+                            "          this.knowledge = Math.max(1.0D, this.knowledge + Math.min(1.0D, $1 * this.knowledge));\n" +
                             "        } \n" +
                             "        if (this.minimum < this.knowledge)\n" +
                             "          this.minimum = this.knowledge; \n" +
                             "        checkTitleChange(oldknowledge, this.knowledge);\n" +
                             "      } \n" +
                             "      try {\n" +
-                            "        if ((oldknowledge != this.knowledge && (this.saveCounter == 0 || this.knowledge > 50.0D)) || decay)\n" +
+                            "        if ((oldknowledge != this.knowledge && (this.saveCounter == 0 || this.knowledge > 50.0D)) || $2)\n" +
                             "          saveValue(isplayer); \n" +
                             "        this.saveCounter = (byte)(this.saveCounter + 1);\n" +
                             "        if (this.saveCounter == 10)\n" +
                             "          this.saveCounter = 0; \n" +
-                            "      } catch (IOException ex) {\n" +
-                            "        logger.log(Level.WARNING, \"Failed to save skill \" + \n" +
+                            "      } catch (java.io.IOException ex) {\n" +
+                            "        logger.log(java.util.logging.Level.WARNING, \"Failed to save skill \" + \n" +
                             "            getName() + \"(\" + getNumber() + \") for creature \" + this.parent.getId(), ex);\n" +
                             "      } \n" +
                             "      if (pid != -10L)\n" +
                             "        if (isplayer)\n" +
                             "          try {\n" +
-                            "            Player holder = Players.getInstance().getPlayer(pid);\n" +
+                            "            com.wurmonline.server.players.Player holder = com.wurmonline.server.Players.getInstance().getPlayer(pid);\n" +
                             "            float weakMod = 1.0F;\n" +
                             "            double bonusKnowledge = this.knowledge;\n" +
                             "            float ws = holder.getBonusForSpellEffect((byte)41);\n" +
@@ -182,8 +182,8 @@ public class SleepBonusHook {
                             "            holder.getCommunicator().sendUpdateSkill(this.number, (float)bonusKnowledge, isTemporary() ? 0 : this.affinity);\n" +
                             "            if (this.number != 2147483644 && this.number != 2147483642)\n" +
                             "              holder.resetInactivity(true); \n" +
-                            "          } catch (NoSuchPlayerException nsp) {\n" +
-                            "            logger.log(Level.WARNING, pid + \":\" + nsp.getMessage(), (Throwable)nsp);\n" +
+                            "          } catch (com.wurmonline.server.NoSuchPlayerException nsp) {\n" +
+                            "            logger.log(java.util.logging.Level.WARNING, pid + \":\" + nsp.getMessage(), (Throwable)nsp);\n" +
                             "          }   \n" +
                             "    } \n" +
                             "  }");

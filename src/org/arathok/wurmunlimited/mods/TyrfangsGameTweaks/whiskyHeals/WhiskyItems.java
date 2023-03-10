@@ -8,9 +8,10 @@ import org.gotti.wurmunlimited.modsupport.ItemTemplateBuilder;
 import java.io.IOException;
 
 public class WhiskyItems {
+
     public static ItemTemplate gauze;
     public static int gauzeId;
-    private static void registerGauze() throws IOException {
+    public static void registerGauze() throws IOException {
         gauze = new ItemTemplateBuilder("arathok.TGT.gauze").name("Gauze", "Gauze",
                         "A sterilizing bandage that slowly heals wounds and is practical as first aid kit.")
                 .modelName("model.cloth.bolt.")
