@@ -10,6 +10,7 @@ import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.noFriendlies.NoFriendli
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHook;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsBehaviour;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsPerformer;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyItems;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
@@ -31,7 +32,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
     public static boolean readWaxedItems;
     public Player aHealedPlayer;
     long nextWoundPoll = 0;
-    boolean checkDB=false;
+    boolean checkDB = false;
     public static Connection dbConn;
 
     @Override
@@ -67,7 +68,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
         if (message != null && message.startsWith("#seedCaves") && communicator.getPlayer().getPower() >= 4) {
 
             communicator.sendSafeServerMessage("Making random Caves!");
-           // SeedOres.setTar();
+            // SeedOres.setTar();
 
         }
         return false;
@@ -106,34 +107,8 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
 
 
         // Iterator and Heal
-        if (!WhiskyHealsPerformer.healedPlayers.isEmpty()) {
-            long time = System.currentTimeMillis();
-            if (nextWoundPoll < time) {
-                int realHeal = 0;
-                Iterator<AHealedWound> healedPlayersIterator = WhiskyHealsPerformer.healedPlayers.iterator();
 
 
-                while (healedPlayersIterator.hasNext()) {
-
-                    AHealedWound aWoundToHeal = healedPlayersIterator.next();
-                    int index = WhiskyHealsPerformer.healedPlayers.indexOf(aWoundToHeal);
-                    aWoundToHeal.healingPool = aWoundToHeal.healingPool + (aWoundToHeal.bandageQuality * Config.healPerQl);
-                    if (aWoundToHeal.healingPool >= 1.0F) {
-                        realHeal = (int) aWoundToHeal.healingPool;
-                        aWoundToHeal.theWound.modifySeverity(-realHeal);
-                        aWoundToHeal.healingPool -= realHeal;
-
-                    }
-                    aWoundToHeal.tickCounter++;
-                    if (aWoundToHeal.tickCounter == 10) {
-                        healedPlayersIterator.remove();
-                    } else
-                        WhiskyHealsPerformer.healedPlayers.set(index, aWoundToHeal);
-                    nextWoundPoll = time + 1000;
-
-                }
-            }
-        }
     }
 
 
@@ -141,6 +116,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
     public void onServerStarted() {
 
         ModActions.registerBehaviourProvider(new WaxingBehavior());
+        ModActions.registerBehaviourProvider(new WhiskyHealsBehaviour());
     }
 
     @Override

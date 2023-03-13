@@ -23,10 +23,9 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class WhiskyHealsPerformer implements ActionPerformer {
-    public static List<AHealedWound> healedPlayers = new LinkedList<AHealedWound>();
 
     public ActionEntry actionEntry;
-
+    int  lastsecond=0;
     public WhiskyHealsPerformer() {
 
 
@@ -48,7 +47,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
     public static boolean canUse(Creature performer, Item source) {
 
-        return performer.isPlayer() && source.getOwnerId() == performer.getWurmId() && !source.isTraded() && source.getTemplateId() == ItemList.beeswax;
+        return performer.isPlayer() && source.getOwnerId() == performer.getWurmId() && !source.isTraded() && source.getTemplateId() == WhiskyItems.gauzeId;
     }
 
 
@@ -69,18 +68,56 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
 
 // EFFECT STUFF GOES HERE
-       
+        float healingPool = 0;
+
+        if (counter == 1.0F) {
+            performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
 
 
+            healingPool = healingPool + (source.getCurrentQualityLevel() * Config.healPerQl);
+            int realHeal = (int) healingPool;
+            target.modifySeverity(-realHeal);
+            healingPool -= realHeal;
+            performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
+            action.setTimeLeft(100);
 
+            return propagate(action,
+                    ActionPropagation.CONTINUE_ACTION,
+                    ActionPropagation.NO_SERVER_PROPAGATION,
+                    ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
+        }
+
+
+        if (action.currentSecond()<lastsecond)
+        {
+
+            healingPool = healingPool + (source.getCurrentQualityLevel() * Config.healPerQl);
+            int realHeal = (int) healingPool;
+            target.modifySeverity(-realHeal);
+
+            return propagate(action,
+                    ActionPropagation.CONTINUE_ACTION,
+                    ActionPropagation.NO_SERVER_PROPAGATION,
+                    ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
+
+        }
+
+        if (lastsecond==10)
+        {
+            return propagate(action,
+                    ActionPropagation.FINISH_ACTION,
+                    ActionPropagation.NO_SERVER_PROPAGATION,
+                    ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
+        }
+        lastsecond=action.currentSecond();
         return propagate(action,
-                ActionPropagation.FINISH_ACTION,
+                ActionPropagation.CONTINUE_ACTION,
                 ActionPropagation.NO_SERVER_PROPAGATION,
                 ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
     }
-        ///TODO: continouus action
 
-    }
+
+}
 
 
 
