@@ -1,5 +1,6 @@
 package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals;
 
+import com.wurmonline.server.Items;
 import com.wurmonline.server.Players;
 import com.wurmonline.server.behaviours.Action;
 import com.wurmonline.server.behaviours.ActionEntry;
@@ -26,6 +27,8 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
     public ActionEntry actionEntry;
     int  lastsecond=0;
+    int realHeal=0;
+    float healingPool = 0;
     public WhiskyHealsPerformer() {
 
 
@@ -68,19 +71,26 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
 
 // EFFECT STUFF GOES HERE
-        float healingPool = 0;
+
 
         if (counter == 1.0F) {
+            if(source.getWeightGrams()<100)
+            {
+                performer.getCommunicator().sendSafeServerMessage("You don't have enough disinfecting gauze to treat the wound!");
+                return propagate(action,
+                        ActionPropagation.FINISH_ACTION,
+                        ActionPropagation.NO_SERVER_PROPAGATION,
+                        ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
+
+            }
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
-
-
             healingPool = healingPool + (source.getCurrentQualityLevel() * Config.healPerQl);
-            int realHeal = (int) healingPool;
+            realHeal = (int) healingPool;
             target.modifySeverity(-realHeal);
             healingPool -= realHeal;
             performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
             action.setTimeLeft(100);
-
+            source.setWeight(source.getWeightGrams()-100,true);
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -88,9 +98,18 @@ public class WhiskyHealsPerformer implements ActionPerformer {
         }
 
 
-        if (action.currentSecond()<lastsecond)
+        if (action.currentSecond()>lastsecond)
         {
+            if(source.getWeightGrams()<100)
+            {
+                performer.getCommunicator().sendSafeServerMessage("You don't have enough disinfecting gauze to treat the wound!");
+                return propagate(action,
+                        ActionPropagation.FINISH_ACTION,
+                        ActionPropagation.NO_SERVER_PROPAGATION,
+                        ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
 
+            }
+            source.setWeight(source.getWeightGrams()-100,true);
             healingPool = healingPool + (source.getCurrentQualityLevel() * Config.healPerQl);
             int realHeal = (int) healingPool;
             target.modifySeverity(-realHeal);

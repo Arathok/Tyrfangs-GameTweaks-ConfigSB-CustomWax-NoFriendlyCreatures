@@ -20,7 +20,7 @@ public class WhiskyItems {
                         ItemTypes.ITEM_TYPE_NAMED,
                         ItemTypes.ITEM_TYPE_CLOTH,
                         ItemTypes.ITEM_TYPE_OWNER_MOVEABLE,
-
+                        ItemTypes.ITEM_TYPE_COMBINE,
 
                 })
 
