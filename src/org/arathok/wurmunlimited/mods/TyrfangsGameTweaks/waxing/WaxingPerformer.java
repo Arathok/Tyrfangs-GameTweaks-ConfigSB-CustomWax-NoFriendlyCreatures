@@ -114,8 +114,9 @@ public class WaxingPerformer implements ActionPerformer {
 
             itemId = rs.getLong("itemId"); // liest quasi den Wert von der Spalte
 
-            Item test = Items.getItem(itemId);
+            Optional<Item> test = Items.getItemOptional(itemId);
 
+            if (test.isPresent())
             waxedItems.add(itemId);
 
 

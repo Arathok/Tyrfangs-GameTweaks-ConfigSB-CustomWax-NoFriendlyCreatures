@@ -26,7 +26,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable, Configurable, ItemTemplatesCreatedListener, ServerStartedListener, ServerPollListener, PlayerMessageListener {
+public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, Initable, PreInitable, Configurable, ItemTemplatesCreatedListener, ServerStartedListener, ServerPollListener, PlayerMessageListener {
 
     public static Logger logger = Logger.getLogger("TyrfangsGameTweaks");
     public static boolean readWaxedItems;
@@ -132,5 +132,34 @@ public class TyrfangsGameTweaks implements WurmServerMod, Initable, PreInitable,
         } catch (NotFoundException | CannotCompileException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onPlayerLogin(Player player) {
+
+
+            dbConn = ModSupportDb.getModSupportDb();
+
+            try {
+                if (!ModSupportDb.hasTable(dbConn, "ArathoksWaxedItems")) {
+                    // table create
+                    try (PreparedStatement ps = dbConn.prepareStatement("CREATE TABLE ArathoksWaxedItems (itemId LONG PRIMARY KEY NOT NULL DEFAULT 0)")) {
+                        ps.execute();
+                    } catch (SQLException e) {
+                        logger.log(Level.WARNING, "Could not create Table!");
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                WaxingPerformer.readFromDB(dbConn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchItemException e) {
+                e.printStackTrace();
+            }
     }
 }
