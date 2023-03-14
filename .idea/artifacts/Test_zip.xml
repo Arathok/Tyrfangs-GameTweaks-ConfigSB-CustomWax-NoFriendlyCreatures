@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="Test.zip">
+  <artifact build-on-make="true" name="Test.zip">
     <output-path>$PROJECT_DIR$/out/artifacts/Test_zip</output-path>
     <root id="root">
       <element id="archive" name="TyrfangsGameTweaks.zip">
