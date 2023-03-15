@@ -11,7 +11,6 @@ import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHo
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsBehaviour;
-import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyHealsPerformer;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.whiskyHeals.WhiskyItems;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
 import org.gotti.wurmunlimited.modsupport.ModSupportDb;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,9 +28,6 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
 
     public static Logger logger = Logger.getLogger("TyrfangsGameTweaks");
     public static boolean readWaxedItems;
-    public Player aHealedPlayer;
-    long nextWoundPoll = 0;
-    boolean checkDB = false;
     public static Connection dbConn;
 
     @Override
@@ -41,7 +36,8 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
         Config.whiskyHeals = Boolean.parseBoolean(properties.getProperty("whiskyHeals", "true"));
         Config.sleepMalus = Boolean.parseBoolean(properties.getProperty("sleepMalus", "true"));
         Config.healPerQl = Float.parseFloat(properties.getProperty("healPerQl", "0.05"));
-        Config.usageFactor = Float.parseFloat(properties.getProperty("usageFactor", "1"));
+        Config.usageFactor = Float.parseFloat(properties.getProperty("usageFactor", "1.0"));
+        Config.sleepBonusFactor = Float.parseFloat(properties.getProperty("sleepBonusFactor", "1.5"));
 
     }
 
@@ -104,11 +100,6 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
                 e.printStackTrace();
             }
         }
-
-
-        // Iterator and Heal
-
-
     }
 
 
@@ -140,20 +131,7 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
 
             dbConn = ModSupportDb.getModSupportDb();
 
-            try {
-                if (!ModSupportDb.hasTable(dbConn, "ArathoksWaxedItems")) {
-                    // table create
-                    try (PreparedStatement ps = dbConn.prepareStatement("CREATE TABLE ArathoksWaxedItems (itemId LONG PRIMARY KEY NOT NULL DEFAULT 0)")) {
-                        ps.execute();
-                    } catch (SQLException e) {
-                        logger.log(Level.WARNING, "Could not create Table!");
-                        throw new RuntimeException(e);
-                    }
 
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
             try {
                 WaxingPerformer.readFromDB(dbConn);
             } catch (SQLException e) {

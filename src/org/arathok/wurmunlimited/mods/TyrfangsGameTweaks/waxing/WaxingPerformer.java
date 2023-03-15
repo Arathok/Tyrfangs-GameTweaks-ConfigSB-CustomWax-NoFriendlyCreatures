@@ -116,12 +116,14 @@ public class WaxingPerformer implements ActionPerformer {
 
             Optional<Item> test = Items.getItemOptional(itemId);
 
-            if (test.isPresent())
-            waxedItems.add(itemId);
+            if (test.isPresent()) {
+                waxedItems.add(itemId);
+            }
 
 
         }
         TyrfangsGameTweaks.readWaxedItems = true;
+        rs.close();
     }
 
 

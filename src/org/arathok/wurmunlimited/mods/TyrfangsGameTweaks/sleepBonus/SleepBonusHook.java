@@ -4,6 +4,7 @@ import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.Config;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.TyrfangsGameTweaks;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 
@@ -98,7 +99,7 @@ public class SleepBonusHook {
                             "            if (this.knowledge < this.minimum || (this.basicPersonal && this.knowledge < 20.0D))\n" +
                             "              $1 *= 3.0D; \n" +
                             "            if (player.hasSleepBonus())\n" +
-                            "              $1 *= 1.5D; \n" + // Hier Sleep Bonus!Faktor
+                            "              $1 *= "+ Config.sleepBonusFactor+"; \n" + // Hier Sleep Bonus!Faktor
                             "            int taffinity = this.affinity + (com.wurmonline.server.skills.AffinitiesTimed.isTimedAffinity(pid, getNumber()) ? 1 : 0);\n" +
                             "            $1 *= (1.0F + taffinity * 0.1F);\n" +
                             "            if ((player.getMovementScheme()).samePosCounts > 20)\n" +
