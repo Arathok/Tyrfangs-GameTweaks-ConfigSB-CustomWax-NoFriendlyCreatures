@@ -25,7 +25,7 @@ import java.util.Optional;
 
 public class WaxingPerformer implements ActionPerformer {
 
-    public static List<Long> waxedItems = new LinkedList<Long>();
+    public static List<Long> waxedItems = new LinkedList<>();
     public ActionEntry actionEntry;
 
     public WaxingPerformer() {
@@ -55,11 +55,6 @@ public class WaxingPerformer implements ActionPerformer {
 
     @Override
     public boolean action(Action action, Creature performer, Item source, Item target, short num, float counter) { // Since we use target and source this time, only need that override
-		/*if (target.getTemplateId() != AlchItems.weaponOilDemiseAnimalId)
-
-			return propagate(action,
-					ActionPropagation.SERVER_PROPAGATION,
-					ActionPropagation.ACTION_PERFORMER_PROPAGATION);*/
         if (!canUse(performer, source)) {
             performer.getCommunicator().sendAlertServerMessage("You are not allowed to do that");
             return propagate(action,
@@ -107,7 +102,7 @@ public class WaxingPerformer implements ActionPerformer {
 
 
     public static void readFromDB(Connection dbConn) throws SQLException, NoSuchItemException {
-        Long itemId;
+        long itemId;
         PreparedStatement ps = dbConn.prepareStatement("SELECT * FROM ArathoksWaxedItems");
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {

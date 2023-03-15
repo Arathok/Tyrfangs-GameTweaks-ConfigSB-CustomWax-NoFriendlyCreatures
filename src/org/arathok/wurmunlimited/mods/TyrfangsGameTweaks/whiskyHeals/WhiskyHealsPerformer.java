@@ -47,11 +47,6 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 // Performer for selecting a single wound.
     @Override
     public boolean action(Action action, Creature performer, Item source, Wound target, short num, float counter) { // Since we use target and source this time, only need that override
-		/*if (target.getTemplateId() != AlchItems.weaponOilDemiseAnimalId)
-
-			return propagate(action,
-					ActionPropagation.SERVER_PROPAGATION,
-					ActionPropagation.ACTION_PERFORMER_PROPAGATION);*/
         if (!canUse(performer, source)) {
             performer.getCommunicator().sendAlertServerMessage("You are not allowed to do that");
             return propagate(action,
@@ -146,7 +141,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             for (Wound aWound:performer.getBody().getWounds().getWounds())  // check all wounds
             {
                 if(aWound.getSeverity()>theWorstWound.getSeverity())        // and if they are worse than the current picked wound replace that
-                    theWorstWound=aWound;                                   // result is a wound thats definitely the worst
+                    theWorstWound=aWound;                                   // result is a wound that's definitely the worst
             }
 
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
@@ -221,7 +216,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             for (Wound aWound:target.getBody().getWounds().getWounds())  // check all wounds
             {
                 if(aWound.getSeverity()>theWorstWound.getSeverity())        // and if they are worse than the current picked wound replace that
-                    theWorstWound=aWound;                                   // result is a wound thats definitely the worst
+                    theWorstWound=aWound;                                   // result is a wound that's definitely the worst
             }
 
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");

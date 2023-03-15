@@ -30,7 +30,7 @@ public class UnWaxingPerformer implements ActionPerformer {
         actionEntry = new ActionEntryBuilder((short) ModActions.getNextActionId(), "unwax", "removing wax", new int[]{
                 6 /* ACTION_TYPE_NOMOVE */,
                 48 /* ACTION_TYPE_ENEMY_ALWAYS */,
-                35 /* Dont Care activated TARGET */,
+                35 /* Don't Care activated TARGET */,
 
         }).range(4).build();
 
@@ -54,11 +54,6 @@ public class UnWaxingPerformer implements ActionPerformer {
 
     @Override
     public boolean action(Action action, Creature performer, Item target, short num, float counter) { // Since we use target and source this time, only need that override
-		/*if (target.getTemplateId() != AlchItems.weaponOilDemiseAnimalId)
-
-			return propagate(action,
-					ActionPropagation.SERVER_PROPAGATION,
-					ActionPropagation.ACTION_PERFORMER_PROPAGATION);*/
         if (!canUse(performer,target)) {
             performer.getCommunicator().sendAlertServerMessage("You are not allowed to do that");
             return propagate(action,
@@ -75,7 +70,7 @@ public class UnWaxingPerformer implements ActionPerformer {
         }
 
 
-        Item wax = null;
+        Item wax;
         try {
             wax = ItemFactory.createItem(ItemList.beeswax, target.getQualityLevel(), (byte) 22, "The Bees");
         } catch (FailedException | NoSuchTemplateException e) {
