@@ -50,7 +50,7 @@ public class PersistentFaithHook {
         }
     }
 
-    public boolean insertBefore(PlayerInfo thisPlayerInfo)  // Insert this after the function
+    public boolean insertBefore(PlayerInfo thisPlayerInfo)  // Insert this before the function
     {
 
         return listOfLastFaithTicks.containsKey(thisPlayerInfo.getPlayerId())
