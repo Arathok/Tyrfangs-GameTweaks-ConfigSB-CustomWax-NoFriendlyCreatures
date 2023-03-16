@@ -7,6 +7,7 @@ import com.wurmonline.server.players.Player;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.noFriendlies.NoFriendliesHook;
+import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.persistentFaithTicks.PersistentFaithHook;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.sleepBonus.SleepBonusHook;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingBehavior;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing.WaxingPerformer;
@@ -24,17 +25,21 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, Initable, PreInitable, Configurable, ItemTemplatesCreatedListener, ServerStartedListener, ServerPollListener, PlayerMessageListener {
+public class TyrfangsGameTweaks implements WurmServerMod, PlayerLoginListener, Initable, PreInitable, Configurable, ItemTemplatesCreatedListener, ServerStartedListener, ServerPollListener, PlayerMessageListener {
 
     public static Logger logger = Logger.getLogger("TyrfangsGameTweaks");
-    public static boolean readWaxedItems;
+    public static boolean readWaxedItems = false;
     public static Connection dbConn;
+    public static boolean readFaithTicks = false;
 
     @Override
     public void configure(Properties properties) {
+        Config.persistentFaithticks = Boolean.parseBoolean(properties.getProperty("persistentFaithticks", "true"));
+        Config.customWaxingSystem = Boolean.parseBoolean(properties.getProperty("customWaxingSystem", "true"));
         Config.fixedWaxingCost = Boolean.parseBoolean(properties.getProperty("fixedWaxingCost", "true"));
         Config.whiskyHeals = Boolean.parseBoolean(properties.getProperty("whiskyHeals", "true"));
         Config.sleepMalus = Boolean.parseBoolean(properties.getProperty("sleepMalus", "true"));
+        Config.noFriendlies = Boolean.parseBoolean(properties.getProperty("noFriendlies", "true"));
         Config.healPerQl = Float.parseFloat(properties.getProperty("healPerQl", "0.05"));
         Config.usageFactor = Float.parseFloat(properties.getProperty("usageFactor", "1.0"));
         Config.sleepBonusFactor = Float.parseFloat(properties.getProperty("sleepBonusFactor", "1.5"));
@@ -100,14 +105,43 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
                 e.printStackTrace();
             }
         }
+
+        if (!readFaithTicks) {
+
+            dbConn = ModSupportDb.getModSupportDb();
+
+            try {
+                if (!ModSupportDb.hasTable(dbConn, "ArathoksPersistentFaithTicks")) {
+                    // table create
+                    try (PreparedStatement ps = dbConn.prepareStatement("CREATE TABLE ArathoksPersistentFaithTicks (playerId LONG PRIMARY KEY NOT NULL DEFAULT 0,timeOfNextTick LONG NOT NULL DEFAULT 0)")) {
+                        ps.execute();
+                    } catch (SQLException e) {
+                        logger.log(Level.WARNING, "Could not create Table!");
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                PersistentFaithHook.readFromDB(dbConn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchItemException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
 
     @Override
     public void onServerStarted() {
-
+        if (Config.customWaxingSystem)
         ModActions.registerBehaviourProvider(new WaxingBehavior());
-        ModActions.registerBehaviourProvider(new WhiskyHealsBehaviour());
+        if (Config.whiskyHeals)
+            ModActions.registerBehaviourProvider(new WhiskyHealsBehaviour());
     }
 
     @Override
@@ -117,27 +151,46 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
 
     @Override
     public void preInit() {
-        SleepBonusHook.insert();
-        try {
-            NoFriendliesHook.insert();
-        } catch (NotFoundException | CannotCompileException e) {
-            e.printStackTrace();
+        if (Config.sleepMalus) {
+            logger.log(Level.INFO, "insertingSleepBonus");
+            SleepBonusHook.insert();
+
         }
+        if (Config.noFriendlies)
+            try {
+                logger.log(Level.INFO, "inserting No Friendlies for priests! >:C");
+                NoFriendliesHook.insert();
+            } catch (NotFoundException | CannotCompileException e) {
+                e.printStackTrace();
+            }
+        if (Config.persistentFaithticks)
+            try{
+                logger.log(Level.INFO,"inserting persistent Faith ticks");
+                PersistentFaithHook.insert();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
     }
 
     @Override
     public void onPlayerLogin(Player player) {
 
+
             logger.log(Level.INFO,"new Player login, rescanning waxed items, for their items!");
             dbConn = ModSupportDb.getModSupportDb();
 
 
-            try {
-                WaxingPerformer.readFromDB(dbConn);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchItemException e) {
-                e.printStackTrace();
-            }
+        dbConn = ModSupportDb.getModSupportDb();
+
+
+
+        try {
+            WaxingPerformer.readFromDB(dbConn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchItemException e) {
+            e.printStackTrace();
+        }
     }
 }
