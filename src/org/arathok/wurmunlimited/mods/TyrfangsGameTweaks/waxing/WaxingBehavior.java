@@ -3,6 +3,7 @@ package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing;
 import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
+import com.wurmonline.server.items.ItemList;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
@@ -32,19 +33,18 @@ public class WaxingBehavior implements BehaviourProvider {
     //, , , , ;
 
     @Override
-    public List<ActionEntry> getBehavioursFor(Creature performer, Item target) {
+    public List<ActionEntry> getBehavioursFor(Creature performer,Item source, Item target) {
 
         if (WaxingPerformer.waxedItems.contains(target.getWurmId())) {
 
                 return new ArrayList<>(unwax);
         }
         else
+            if(source.getTemplateId()== ItemList.beeswax)
             return new ArrayList<>(wax);
-        
+
+        return null;
     }
-    @Override
-    public List<ActionEntry> getBehavioursFor(Creature performer, Item source, Item target) {
-        return getBehavioursFor(performer, target);
-    }
+
 
 }

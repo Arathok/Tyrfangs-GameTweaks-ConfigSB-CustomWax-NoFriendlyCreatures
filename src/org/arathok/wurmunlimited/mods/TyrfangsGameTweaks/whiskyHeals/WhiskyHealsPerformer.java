@@ -116,7 +116,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
     @Override
     public boolean action(Action action, Creature performer, Item source, Item target, short num, float counter) { // Since we use target and source this time, only need that override
 
-        if (!canUse(performer, source)&&target.isBodyPart()) {
+        if (!canUse(performer, source)&&!target.isBodyPart()) {
             performer.getCommunicator().sendAlertServerMessage("You are not allowed to do that");
             return propagate(action,
                     ActionPropagation.FINISH_ACTION,
@@ -136,13 +136,15 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
         }
         if (counter == 1.0F) {
-
-            theWorstWound= Wounds.getAnyWound(performer.getWurmId());   //first pick any wound of the performer
-            for (Wound aWound:performer.getBody().getWounds().getWounds())  // check all wounds
-            {
-                if(aWound.getSeverity()>theWorstWound.getSeverity())        // and if they are worse than the current picked wound replace that
-                    theWorstWound=aWound;                                   // result is a wound that's definitely the worst
+            if(performer.getBody().getWounds().getWounds()!=null) {
+                theWorstWound = performer.getBody().getWounds().getWounds()[1];   //first pick any wound of the performer
+                for (Wound aWound : performer.getBody().getWounds().getWounds())  // check all wounds
+                {
+                    if (aWound.getSeverity() > theWorstWound.getSeverity())        // and if they are worse than the current picked wound replace that
+                        theWorstWound = aWound;                                   // result is a wound that's definitely the worst
+                }
             }
+
 
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
             maxhealingPool = (source.getCurrentQualityLevel() * Config.healPerQl)*10;
@@ -212,7 +214,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
         }
         if (counter == 1.0F) {
 
-            theWorstWound= Wounds.getAnyWound(target.getWurmId());   //first pick any wound of the performer
+            theWorstWound= target.getBody().getWounds().getWounds()[1];   //first pick any wound of the performer
             for (Wound aWound:target.getBody().getWounds().getWounds())  // check all wounds
             {
                 if(aWound.getSeverity()>theWorstWound.getSeverity())        // and if they are worse than the current picked wound replace that

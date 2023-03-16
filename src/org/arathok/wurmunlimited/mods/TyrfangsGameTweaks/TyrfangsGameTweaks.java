@@ -128,7 +128,7 @@ public class TyrfangsGameTweaks implements WurmServerMod,PlayerLoginListener, In
     @Override
     public void onPlayerLogin(Player player) {
 
-
+            logger.log(Level.INFO,"new Player login, rescanning waxed items, for their items!");
             dbConn = ModSupportDb.getModSupportDb();
 
 

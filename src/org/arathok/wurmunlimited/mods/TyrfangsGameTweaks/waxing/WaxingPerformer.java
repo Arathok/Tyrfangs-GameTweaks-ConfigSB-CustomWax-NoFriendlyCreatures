@@ -47,15 +47,16 @@ public class WaxingPerformer implements ActionPerformer {
         return actionEntry.getNumber();
     }
 
-    public static boolean canUse(Creature performer, Item source) {
+    public static boolean canUse(Creature performer, Item source, Item target) {
 
-        return performer.isPlayer() && source.getOwnerId() == performer.getWurmId() && !source.isTraded() && source.getTemplateId() == ItemList.beeswax;
+        return performer.isPlayer() && source.getOwnerId() == performer.getWurmId() && !source.isTraded() && source.getTemplateId() == ItemList.beeswax
+                &&(target.isFood()||target.isCooked()||target.isHerb()||target.isSpice());
     }
 
 
     @Override
     public boolean action(Action action, Creature performer, Item source, Item target, short num, float counter) { // Since we use target and source this time, only need that override
-        if (!canUse(performer, source)) {
+        if (!canUse(performer, source,target)) {
             performer.getCommunicator().sendAlertServerMessage("You are not allowed to do that");
             return propagate(action,
                     ActionPropagation.FINISH_ACTION,
