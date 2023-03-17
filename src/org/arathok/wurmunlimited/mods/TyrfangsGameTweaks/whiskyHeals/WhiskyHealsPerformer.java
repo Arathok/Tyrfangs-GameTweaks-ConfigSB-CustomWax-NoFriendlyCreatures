@@ -149,7 +149,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
             maxhealingPool = (source.getCurrentQualityLevel() * Config.healPerQl)*10;
             healingPerTick= maxhealingPool/10.0F;
-            realHeal = ((int) healingPerTick)*(635);
+            realHeal = (int)( healingPerTick*635.0F);
             theWorstWound.modifySeverity(-realHeal);
 
             performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
