@@ -1,6 +1,7 @@
 package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.waxing;
 
 import com.wurmonline.server.FailedException;
+import com.wurmonline.server.Items;
 import com.wurmonline.server.behaviours.Action;
 import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
@@ -64,29 +65,8 @@ public class UnWaxingPerformer implements ActionPerformer {
 
 
 // EFFECT STUFF GOES HERE
-        float weight =  ((target.getVolume()*0.95F)/16); // Config
-        if (Config.fixedWaxingCost) {
-            weight = 10;
-        }
-
-
-        Item wax;
-        try {
-            wax = ItemFactory.createItem(ItemList.beeswax, target.getQualityLevel(), (byte) 22, "The Bees");
-        } catch (FailedException | NoSuchTemplateException e) {
-            throw new RuntimeException(e);
-        }
-        if (weight > 0) {
-            wax.setWeight((int) weight, true);
-            performer.getInventory().insertItem(wax);
-        }
-         target.setHasNoDecay(false);
-        target.setIsNoEatOrDrink(false);
-        try {
-            WaxingPerformer.remove(TyrfangsGameTweaks.dbConn,target.getWurmId());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Items.destroyItem(target.getWurmId());
+        performer.getCommunicator().sendSafeServerMessage("You peel off the layer of wax and the item crumbles to dust.");
 
         return propagate(action,
                     ActionPropagation.FINISH_ACTION,

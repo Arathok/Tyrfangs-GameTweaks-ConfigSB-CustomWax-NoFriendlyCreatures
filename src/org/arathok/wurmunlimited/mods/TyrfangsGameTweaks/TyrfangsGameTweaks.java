@@ -2,7 +2,9 @@ package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks;
 
 
 import com.wurmonline.server.NoSuchItemException;
+import com.wurmonline.server.bodys.Wounds;
 import com.wurmonline.server.creatures.Communicator;
+import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.players.Player;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
@@ -60,10 +62,12 @@ public class TyrfangsGameTweaks implements WurmServerMod, PlayerLoginListener, I
     @Override
     public boolean onPlayerMessage(Communicator communicator, String message) {
 
-        if (message != null && message.startsWith("#setTar") && communicator.getPlayer().getPower() >= 4) {
+        if (message != null && message.startsWith("#hurtme") && communicator.getPlayer().getPower() >= 4) {
 
-            communicator.sendSafeServerMessage("Turning Everything into Tar!");
-            //SeedOres.setTar();
+            communicator.sendSafeServerMessage("AraAra!");
+            Player you=communicator.getPlayer();
+            you.addWoundOfType(null, (byte) 3,9,true,1.0F,false,10000,0.0F,0.0F,false,false);
+
 
         }
         if (message != null && message.startsWith("#seedCaves") && communicator.getPlayer().getPower() >= 4) {
@@ -113,7 +117,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, PlayerLoginListener, I
             try {
                 if (!ModSupportDb.hasTable(dbConn, "ArathoksPersistentFaithTicks")) {
                     // table create
-                    try (PreparedStatement ps = dbConn.prepareStatement("CREATE TABLE ArathoksPersistentFaithTicks (playerId LONG PRIMARY KEY NOT NULL DEFAULT 0,timeOfNextTick LONG NOT NULL DEFAULT 0)")) {
+                    try (PreparedStatement ps = dbConn.prepareStatement("CREATE TABLE ArathoksPersistentFaithTicks (playerId LONG PRIMARY KEY NOT NULL DEFAULT 0,timeOfNextTick LONG NOT NULL DEFAULT 0,numTicks LONG NOT NULL DEFAULT 0)")) {
                         ps.execute();
                     } catch (SQLException e) {
                         logger.log(Level.WARNING, "Could not create Table!");

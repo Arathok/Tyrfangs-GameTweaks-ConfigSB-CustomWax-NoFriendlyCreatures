@@ -72,12 +72,13 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
             maxhealingPool = (source.getCurrentQualityLevel() * Config.healPerQl)*10;
             healingPerTick= maxhealingPool/10.0F;
-            realHeal = ((int) healingPerTick)*(635);
+            realHeal = (int) (healingPerTick*635);
             target.modifySeverity(-realHeal);
 
             performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
             action.setTimeLeft(100);
             source.setWeight(source.getWeightGrams()-(int)usedUpGauze,true);
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -85,12 +86,12 @@ public class WhiskyHealsPerformer implements ActionPerformer {
         }
 
 
-        if (action.currentSecond()>lastsecond)
+        if (action.getSecond()>lastsecond)
         {
 
 
             target.modifySeverity(-realHeal);
-
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -98,14 +99,15 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
         }
 
-        if (action.currentSecond()>=10)
+        if (action.getSecond()>=10)
         {
+            performer.getCommunicator().sendNormalServerMessage("you finish disinifecting");
             return propagate(action,
                     ActionPropagation.FINISH_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
                     ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
         }
-        lastsecond=action.currentSecond();
+        lastsecond=action.getSecond();
         return propagate(action,
                 ActionPropagation.CONTINUE_ACTION,
                 ActionPropagation.NO_SERVER_PROPAGATION,
@@ -155,6 +157,7 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
             action.setTimeLeft(100);
             source.setWeight(source.getWeightGrams()-(int)usedUpGauze,true);
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -162,12 +165,12 @@ public class WhiskyHealsPerformer implements ActionPerformer {
         }
 
 
-        if (action.currentSecond()>lastsecond)
+        if (action.getSecond()>lastsecond)
         {
 
 
             theWorstWound.modifySeverity(-realHeal);
-
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -175,14 +178,15 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
         }
 
-        if (action.currentSecond()>=10)
+        if (action.getSecond()>=10)
         {
+            performer.getCommunicator().sendNormalServerMessage("you finish disinifecting");
             return propagate(action,
                     ActionPropagation.FINISH_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
                     ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
         }
-        lastsecond=action.currentSecond();
+        lastsecond=action.getSecond();
         return propagate(action,
                 ActionPropagation.CONTINUE_ACTION,
                 ActionPropagation.NO_SERVER_PROPAGATION,
@@ -224,12 +228,13 @@ public class WhiskyHealsPerformer implements ActionPerformer {
             performer.getCommunicator().sendSafeServerMessage("You start desinfecting the wound.");
             maxhealingPool = (source.getCurrentQualityLevel() * Config.healPerQl)*10;
             healingPerTick= maxhealingPool/10.0F;
-            realHeal = ((int) healingPerTick)*(635);
+            realHeal = (int) (healingPerTick*635);
             theWorstWound.modifySeverity(-realHeal);
 
             performer.sendActionControl(action.getActionEntry().getActionString(),true,100); // tenths of seconds
             action.setTimeLeft(100);
             source.setWeight(source.getWeightGrams()-(int)usedUpGauze,true);
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -237,12 +242,12 @@ public class WhiskyHealsPerformer implements ActionPerformer {
         }
 
 
-        if (action.currentSecond()>lastsecond)
+        if (action.getSecond()>lastsecond)
         {
 
 
             theWorstWound.modifySeverity(-realHeal);
-
+            lastsecond=action.getSecond();
             return propagate(action,
                     ActionPropagation.CONTINUE_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
@@ -250,14 +255,15 @@ public class WhiskyHealsPerformer implements ActionPerformer {
 
         }
 
-        if (action.currentSecond()>=10)
+        if (action.getSecond()>=10)
         {
+            performer.getCommunicator().sendNormalServerMessage("you finish disinifecting");
             return propagate(action,
                     ActionPropagation.FINISH_ACTION,
                     ActionPropagation.NO_SERVER_PROPAGATION,
                     ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION);
         }
-        lastsecond=action.currentSecond();
+        lastsecond=action.getSecond();
         return propagate(action,
                 ActionPropagation.CONTINUE_ACTION,
                 ActionPropagation.NO_SERVER_PROPAGATION,

@@ -1,12 +1,15 @@
 package org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.persistentFaithTicks;
 
 import com.wurmonline.server.NoSuchItemException;
+import com.wurmonline.server.Players;
+import com.wurmonline.server.players.Player;
 import com.wurmonline.server.players.PlayerInfo;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
 import org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.TyrfangsGameTweaks;
+import org.fourthline.cling.support.avtransport.callback.Play;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 import org.gotti.wurmunlimited.modsupport.ModSupportDb;
 
@@ -18,6 +21,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 
 
@@ -25,60 +30,82 @@ public class PersistentFaithHook {
 
     static ClassPool classPool = HookManager.getInstance().getClassPool();
     static CtClass ctPlayerInfo;
-    public static HashMap<Long, Long> listOfLastFaithTicks = new HashMap<>();
-    long time = 0;
-    long playerId = 0;
-    long timeOfNextTick = 0;
-    Connection dbConn;
+    public static List<PlayerFaithInfo> listOfLastFaithTicks = new LinkedList<>();
+    static long time = 0;
+    static long playerId = 0;
+    static long timeOfNextTick = 0;
+    static long numTicks =0;
+    static Connection dbConn;
 
-    public void insertAfter(PlayerInfo thisPlayerInfo) throws SQLException // Insert this after the function
+    public static void insertAfter(PlayerInfo thisPlayerInfo) throws SQLException // Insert this after the function
     {
+        PlayerFaithInfo pfi=new PlayerFaithInfo();
         ZonedDateTime now = ZonedDateTime.now();
         LocalDate tomorrow = ZonedDateTime.now().toLocalDate().plusDays(1);
         ZoneId zone = ZoneId.of("Europe/Berlin");
         ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
         long duration = java.time.Duration.between(now, tomorrowStart).toMillis();
         time = System.currentTimeMillis();
+        pfi.numTicks=thisPlayerInfo.numFaith;
         if (thisPlayerInfo.numFaith == 5) // if the player already had 4 faith ticks
         {
-            playerId = thisPlayerInfo.getPlayerId();
+            pfi.playerId = thisPlayerInfo.getPlayerId();
 
-            timeOfNextTick = time + duration; // get their id and calculate time of the next possible faith tick put them in a Hashmap
+            pfi.timeOfNextTick = time + duration; // get their id and calculate time of the next possible faith tick put them in a Hashmap
             dbConn = ModSupportDb.getModSupportDb();
-            add(dbConn, playerId, timeOfNextTick);
+            add(dbConn, pfi);
 
         }
+        else
+        {
+            pfi.playerId = thisPlayerInfo.getPlayerId();
+
+            pfi.timeOfNextTick = time; // get their id and calculate time of the next possible faith tick put them in a Hashmap
+            dbConn = ModSupportDb.getModSupportDb();
+            add(dbConn, pfi);
+        }
+
     }
 
-    public boolean insertBefore(PlayerInfo thisPlayerInfo)  // Insert this before the function
+    public static boolean insertBefore(PlayerInfo thisPlayerInfo)  // Insert this before the function
     {
+        boolean playerFound = false;
+        long wurmId = thisPlayerInfo.getPlayerId();
+        long timeonexttick = 0;
 
-        return listOfLastFaithTicks.containsKey(thisPlayerInfo.getPlayerId())
-                && System.currentTimeMillis() < listOfLastFaithTicks.get(thisPlayerInfo.getPlayerId()); // if the player already had 4 faith ticks
+        for (PlayerFaithInfo aPlayerFaithInfo:listOfLastFaithTicks)
+        {
+            if (aPlayerFaithInfo.playerId==wurmId)
+            {
+                playerFound=true;
+                timeonexttick=aPlayerFaithInfo.timeOfNextTick;
+            }
+        }
+        return playerFound && System.currentTimeMillis() < timeonexttick; // if the player already had 4 faith ticks
 
     }
 
-    public static void add(Connection dbConn, long playerId, long timeOfNextTick) throws SQLException {
-        listOfLastFaithTicks.put(playerId, timeOfNextTick);
-        PreparedStatement ps = dbConn.prepareStatement("insert or replace into ArathoksPersistentFaithTicks (playerId,timeOfNextTick) values (?,?)");
+    public static void add(Connection dbConn, PlayerFaithInfo pfi) throws SQLException {
+        listOfLastFaithTicks.add(pfi);
+        PreparedStatement ps = dbConn.prepareStatement("insert or replace into ArathoksPersistentFaithTicks (playerId,timeOfNextTick,numTicks) values (?,?,?)");
         ps.setLong(1, playerId);
         ps.setLong(2, timeOfNextTick);
+        ps.setLong(3, numTicks);
         ps.executeUpdate();
 
     }
 
     public static void readFromDB(Connection dbConn) throws SQLException, NoSuchItemException {
-        long playerId;
-        long timeofNextTick;
+        PlayerFaithInfo pfi = new PlayerFaithInfo();
         PreparedStatement ps = dbConn.prepareStatement("SELECT * FROM ArathoksPersistentFaithTicks");
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
 
-            playerId = rs.getLong("playerId"); // liest quasi den Wert von der Spalte
-            timeofNextTick = rs.getLong("timeofNextTick"); // liest quasi den Wert von der Spalte
+            pfi.playerId = rs.getLong("playerId"); // liest quasi den Wert von der Spalte
+            pfi.timeOfNextTick = rs.getLong("timeofNextTick"); // liest quasi den Wert von der Spalte
+            pfi.numTicks =rs.getLong("numTicks");
 
-
-            listOfLastFaithTicks.put(playerId, timeofNextTick);
+            listOfLastFaithTicks.add(pfi);
         }
 
         TyrfangsGameTweaks.readFaithTicks = true;
@@ -91,10 +118,10 @@ public class PersistentFaithHook {
             //final boolean checkPrayerFaith() {
             TyrfangsGameTweaks.logger.log(Level.INFO, "inserting check for faith tick time");
             ctPlayerInfo.getMethod("checkPrayerFaith", "()Z")
-                    .insertBefore("if(TyrfangsGameTweaks.PersistentFaitHook.insertBefore(this))return false;");
+                    .insertBefore("if(org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.persistentFaithTicks.PersistentFaithHook.insertBefore(this))return false;");
             TyrfangsGameTweaks.logger.log(Level.INFO, "inserting adding to the list");
             ctPlayerInfo.getMethod("checkPrayerFaith", "()Z")
-                    .insertAfter("TyrfangsGameTweaks.PersistentFaithHook.insertAfter(this);");
+                    .insertAfter("org.arathok.wurmunlimited.mods.TyrfangsGameTweaks.persistentFaithTicks.PersistentFaithHook.insertAfter(this);");
 
 
         } catch (NotFoundException | CannotCompileException e) {
