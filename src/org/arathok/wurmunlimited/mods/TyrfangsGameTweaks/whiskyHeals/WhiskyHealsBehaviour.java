@@ -45,8 +45,7 @@ public class WhiskyHealsBehaviour implements BehaviourProvider {
 
     public List<ActionEntry> getBehavioursFor(Creature performer,Item source,Creature target) {
 
-        if (source.getTemplateId()== WhiskyItems.gauzeId&&target.getBody().getWounds().getWounds()!=null) {
-
+        if (source.getTemplateId()== WhiskyItems.gauzeId&&target.getBody().getWounds()!=null) {
             return new ArrayList<>(desinfect);
         }
         else

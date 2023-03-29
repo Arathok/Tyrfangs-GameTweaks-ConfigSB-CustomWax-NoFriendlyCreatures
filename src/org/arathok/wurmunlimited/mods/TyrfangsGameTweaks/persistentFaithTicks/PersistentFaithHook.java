@@ -39,6 +39,7 @@ public class PersistentFaithHook {
 
     public static void insertAfter(PlayerInfo thisPlayerInfo) throws SQLException // Insert this after the function
     {
+        TyrfangsGameTweaks.logger.log(Level.INFO,"running Insert After Block");
         PlayerFaithInfo pfi=new PlayerFaithInfo();
         ZonedDateTime now = ZonedDateTime.now();
         LocalDate tomorrow = ZonedDateTime.now().toLocalDate().plusDays(1);
@@ -47,11 +48,19 @@ public class PersistentFaithHook {
         long duration = java.time.Duration.between(now, tomorrowStart).toMillis();
         time = System.currentTimeMillis();
         pfi.numTicks=thisPlayerInfo.numFaith;
-        if (thisPlayerInfo.numFaith == 5) // if the player already had 4 faith ticks
+        int maxFaithnum=0;
+        if (thisPlayerInfo.isFlagSet(81))
+        {
+            maxFaithnum=6;
+        }
+        else maxFaithnum=5;
+        if (thisPlayerInfo.numFaith == maxFaithnum) // if the player already had 4 faith ticks
         {
             pfi.playerId = thisPlayerInfo.getPlayerId();
 
             pfi.timeOfNextTick = time + duration; // get their id and calculate time of the next possible faith tick put them in a Hashmap
+       //     TyrfangsGameTweaks.logger.log(Level.INFO,"next tick"+(time+duration));
+      //      TyrfangsGameTweaks.logger.log(Level.INFO,"Adding to DB:" + pfi.playerId +", "+pfi.timeOfNextTick+", "+pfi.numTicks );
             dbConn = ModSupportDb.getModSupportDb();
             add(dbConn, pfi);
 
@@ -62,6 +71,7 @@ public class PersistentFaithHook {
 
             pfi.timeOfNextTick = time; // get their id and calculate time of the next possible faith tick put them in a Hashmap
             dbConn = ModSupportDb.getModSupportDb();
+        //    TyrfangsGameTweaks.logger.log(Level.INFO,"Adding to DB:" + pfi.playerId +", "+pfi.timeOfNextTick+", "+pfi.numTicks );
             add(dbConn, pfi);
         }
 
@@ -72,15 +82,17 @@ public class PersistentFaithHook {
         boolean playerFound = false;
         long wurmId = thisPlayerInfo.getPlayerId();
         long timeonexttick = 0;
-
+      //  TyrfangsGameTweaks.logger.log(Level.INFO,"looking up player in table of Faith ticks...");
         for (PlayerFaithInfo aPlayerFaithInfo:listOfLastFaithTicks)
         {
             if (aPlayerFaithInfo.playerId==wurmId)
             {
                 playerFound=true;
                 timeonexttick=aPlayerFaithInfo.timeOfNextTick;
+          //      TyrfangsGameTweaks.logger.log(Level.INFO,"found Player "+thisPlayerInfo.getName());
             }
         }
+        //TyrfangsGameTweaks.logger.log(Level.INFO,"current Time: "+System.currentTimeMillis()+" next Tick: "+ timeonexttick);
         return playerFound && System.currentTimeMillis() < timeonexttick; // if the player already had 4 faith ticks
 
     }
@@ -88,9 +100,10 @@ public class PersistentFaithHook {
     public static void add(Connection dbConn, PlayerFaithInfo pfi) throws SQLException {
         listOfLastFaithTicks.add(pfi);
         PreparedStatement ps = dbConn.prepareStatement("insert or replace into ArathoksPersistentFaithTicks (playerId,timeOfNextTick,numTicks) values (?,?,?)");
-        ps.setLong(1, playerId);
-        ps.setLong(2, timeOfNextTick);
-        ps.setLong(3, numTicks);
+        ps.setLong(1, pfi.playerId);
+        ps.setLong(2, pfi.timeOfNextTick);
+        ps.setLong(3, pfi.numTicks);
+        TyrfangsGameTweaks.logger.log(Level.INFO,"Adding to DB:" + pfi.playerId +", "+pfi.timeOfNextTick+", "+pfi.numTicks );
         ps.executeUpdate();
 
     }
@@ -104,7 +117,9 @@ public class PersistentFaithHook {
             pfi.playerId = rs.getLong("playerId"); // liest quasi den Wert von der Spalte
             pfi.timeOfNextTick = rs.getLong("timeofNextTick"); // liest quasi den Wert von der Spalte
             pfi.numTicks =rs.getLong("numTicks");
-
+            Player p =Players.getInstance().getPlayerOrNull(pfi.playerId);
+            PlayerInfo pi = p.getSaveFile();
+            pi.numFaith=(byte)pfi.numTicks;
             listOfLastFaithTicks.add(pfi);
         }
 
