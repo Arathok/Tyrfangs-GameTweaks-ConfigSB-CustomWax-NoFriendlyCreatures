@@ -118,9 +118,11 @@ public class PersistentFaithHook {
             pfi.timeOfNextTick = rs.getLong("timeofNextTick"); // liest quasi den Wert von der Spalte
             pfi.numTicks =rs.getLong("numTicks");
             Player p =Players.getInstance().getPlayerOrNull(pfi.playerId);
-            PlayerInfo pi = p.getSaveFile();
-            pi.numFaith=(byte)pfi.numTicks;
-            listOfLastFaithTicks.add(pfi);
+            if (p!=null) {
+                PlayerInfo pi = p.getSaveFile();
+                pi.numFaith = (byte) pfi.numTicks;
+                listOfLastFaithTicks.add(pfi);
+            }
         }
 
         TyrfangsGameTweaks.readFaithTicks = true;

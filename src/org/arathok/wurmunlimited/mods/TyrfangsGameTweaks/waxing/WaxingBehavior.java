@@ -40,7 +40,7 @@ public class WaxingBehavior implements BehaviourProvider {
                 return new ArrayList<>(unwax);
         }
         else
-            if(source.getTemplateId()== ItemList.beeswax)
+            if(source.getTemplateId()== ItemList.beeswax&&(target.isFood()||target.isHerb()||target.isSpice()||target.isCooked()))
             return new ArrayList<>(wax);
 
         return null;

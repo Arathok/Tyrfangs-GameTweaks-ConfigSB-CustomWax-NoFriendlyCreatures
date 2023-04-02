@@ -37,7 +37,7 @@ public class TyrfangsGameTweaks implements WurmServerMod, PlayerLoginListener, I
     @Override
     public void configure(Properties properties) {
         Config.persistentFaithticks = Boolean.parseBoolean(properties.getProperty("persistentFaithticks", "true"));
-        Config.customWaxingSystem = Boolean.parseBoolean(properties.getProperty("customWaxingSystem", "true"));
+        Config.customWaxingSystem = Boolean.parseBoolean(properties.getProperty("enableWaxingSystem", "true"));
         Config.fixedWaxingCost = Boolean.parseBoolean(properties.getProperty("fixedWaxingCost", "true"));
         Config.whiskyHeals = Boolean.parseBoolean(properties.getProperty("whiskyHeals", "true"));
         Config.sleepMalus = Boolean.parseBoolean(properties.getProperty("sleepMalus", "true"));
